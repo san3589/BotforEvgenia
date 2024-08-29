@@ -3,7 +3,6 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.strategy import FSMStrategy
 from aiogram.filters.command import CommandStart
-from aiogram.enums.parse_mode import ParseMode
 from dotenv import load_dotenv, find_dotenv
 import os
 load_dotenv(find_dotenv())
@@ -19,7 +18,7 @@ dp.include_router(user_router)
 dp.include_router(admin_router)
 
 
-bot.my_admins_list = [1887353856, 1500178974]
+bot.my_admins_list = [os.getenv("ADMIN_ID")]
 
 start_kb = ReplyKeyboardFactory.create_keyboard(["Заполнить анкету"])
 

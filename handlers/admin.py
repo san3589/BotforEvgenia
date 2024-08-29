@@ -8,7 +8,7 @@ import pandas as pd
 
 from filters.chat_type import ChatTypeFilter, IsAdmin
 from kb.reply import ReplyKeyboardFactory, del_kb
-from user_chat import thi_kb
+from handlers.user_chat import thi_kb
 
 admin_router = Router()
 admin_router.message.filter(ChatTypeFilter(['private']), IsAdmin())

@@ -4,10 +4,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import pandas as pd
 import gspread
-import asyncio
 
 from filters.chat_type import ChatTypeFilter
 from kb.reply import del_kb, ReplyKeyboardFactory
+
+gc = gspread.service_account(filename="nvis2024-b3995bc06efd.json")
+wks = gc.open().sheet1
 
 
 async def check_user_subscription(bot: Bot, chat_id: int, user_id: int) -> bool:
@@ -25,7 +27,7 @@ def add_to_excel(data: dict):
     except FileNotFoundError:
         # Если файла нет, создаём новый DataFrame
         df = pd.DataFrame(
-            columns=["User ID", "Представитель компании или эксперт", "Название компании", "Бренды", "Ниша",
+            columns=["User ID", "Представитель компании или эксперт", "Название компании", "Ниша",
                      "Интересующие интеграции"])
 
         # Конвертируем входные данные в DataFrame
@@ -33,6 +35,7 @@ def add_to_excel(data: dict):
 
     # Соединяем старые и новые данные
     df = pd.concat([df, new_df], ignore_index=True)
+    wks.update([df.columns.values.tolist()] + df.values.tolist())
 
     # Сохраняем файл
     df.to_excel('data.xlsx', index=False, engine='openpyxl')
@@ -117,7 +120,7 @@ async def t_question_comp(message: types.Message, state: FSMContext, bot: Bot):
     await state.set_state(ChatState.wait_for_subscribe_company)
 
 
-@user_router.callback_query(ChatState.wait_for_subscribe_company, lambda c: c.data == "check_subscription")
+@user_router.callback_query(ChatState.wait_for_subscribe_company, F.data == "check_subscription")
 async def get_message_chat_comp(query: types.CallbackQuery, state: FSMContext, bot: Bot):
     user_id = query.from_user.id
     chat_id = -1002239802320
@@ -150,7 +153,7 @@ async def t_question_exp(message: types.Message, state: FSMContext, bot: Bot):
     await state.set_state(ChatState.wait_for_subscribe_exp)
 
 
-@user_router.callback_query(ChatState.wait_for_subscribe_exp, lambda c: c.data == "check_subscription")
+@user_router.callback_query(ChatState.wait_for_subscribe_exp, F.data == "check_subscription")
 async def get_message_chat_exp(query: types.CallbackQuery, state: FSMContext, bot: Bot):
     user_id = query.from_user.id
     chat_id = -1002239802320  # Замените на ваш ID канала
